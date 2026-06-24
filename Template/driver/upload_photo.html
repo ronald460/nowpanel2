@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cargar Foto</title>
+    <link rel="stylesheet" href="/static/css/form/upload_photo.css" />
+    <link rel="stylesheet" href="/static/css/datatables.css" />
+    <link rel="stylesheet" href="/static/css/tooltip2.css" />
+    <script src="/static/css/DataTables/datatables.js"></script>
+    <script src="/static/css/js/jszip.min.js"></script>
+    <script src="/static/css/js/pdfmake.min.js"></script>
+    <script src="/static/css/js/vfs_fonts.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+      {% include 'header.html' %} {% include 'aside.html' %}
+
+      <div class="content-wrapper">
+        <div class="content">
+          <div class="container-fluid">
+            <div class="container">
+              <div class="photo">
+                <h6>Foto Actual</h6>
+                {% if conductor.photo %}
+                <img
+                  src="{{ conductor.photo }}"
+                  alt="Foto del conductor"
+                  style="max-width: 200px; max-height: 200px"
+                />
+                {% else %}
+                <div class="alert alert-info">No hay foto registrada</div>
+                {% endif %}
+              </div>
+              <div class="name">
+                <h6>Nombre</h6>
+                <input
+                  type="text"
+                  class="form-control"
+                  value="{{conductor.name}}"
+                  disabled
+                />
+              </div>
+              <div class="lastname">
+                <h6>Apellido</h6>
+                <input
+                  type="text"
+                  class="form-control"
+                  value="{{conductor.last_name}}"
+                  disabled
+                />
+              </div>
+              <div class="document">
+                <h6>Cedula</h6>
+                <input
+                  type="text"
+                  class="form-control"
+                  value="{{conductor.document}}"
+                  disabled
+                />
+              </div>
+              <div class="email">
+                <h6>Correo</h6>
+                <input
+                  type="text"
+                  class="form-control"
+                  value="{{conductor.email}}"
+                  disabled
+                />
+              </div>
+              <div class="status">
+                <h6>Status</h6>
+                <input
+                  type="text"
+                  class="form-control"
+                  value="{{conductor.driver_status}}"
+                  disabled
+                />
+              </div>
+              <form method="post" id="uploadForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="upload_photo">
+                  <h6>Subir Foto</h6>
+                  <input
+                    type="file"
+                    class="form-control"
+                    id="image"
+                    name="image"
+                    accept="image/*"
+                    required
+                  />
+                </div>
+                <div class="btn_save">
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-primary" type="submit">
+                      Guardar
+                    </button>
+                  </div>
+                </div>
+                <div class="btn_canc">
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-primary" type="button">
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <!-- Scripts -->
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</html>

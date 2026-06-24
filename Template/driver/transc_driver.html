@@ -1,0 +1,240 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movimiento a billetera</title>
+    <!-- jQuery (primero) -->
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <!-- AdminLTE CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <!-- Tus estilos personalizados (asegúrate de que existan) -->
+    <link rel="stylesheet" href="{% static 'css/form/believe.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/datatables.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tooltip2.css' %}" />
+    <script src="{% static 'css/DataTables/datatables.js' %}"></script>
+    <script src="{% static 'css/js/jszip.min.js' %}"></script>
+    <script src="{% static 'css/js/pdfmake.min.js' %}"></script>
+    <script src="{% static 'css/js/js/vfs_fonts.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+  <body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+      {% include 'header.html' %} {% include 'aside.html' %}
+
+      <div class="content-wrapper">
+        <div class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1 class="m-0">Gestión de Billetera del Conductor</h1>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end">
+                  <li class="breadcrumb-item"><a href="#">Inicio</a></li>
+                  <li class="breadcrumb-item active">Acreditar/Debitar</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="container-fluid">
+            <!-- Tarjeta: Datos del usuario -->
+            <div class="card card-primary card-outline mb-4">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-user me-2"></i>Información del conductor
+                </h3>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Nombre</label>
+                    <input
+                      type="text"
+                      class="form-control bg-light"
+                      disabled
+                      value="{{usuario.name}}"
+                    />
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Apellido</label>
+                    <input
+                      type="text"
+                      class="form-control bg-light"
+                      disabled
+                      value="{{usuario.last_name}}"
+                    />
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Cédula</label>
+                    <input
+                      type="text"
+                      class="form-control bg-light"
+                      disabled
+                      value="{{usuario.document}}"
+                    />
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Correo</label>
+                    <input
+                      type="text"
+                      class="form-control bg-light"
+                      disabled
+                      value="{{usuario.email}}"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tarjeta: Formulario de movimiento -->
+            <div class="card card-success card-outline">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-exchange-alt me-2"></i>Registrar movimiento
+                </h3>
+              </div>
+              <div class="card-body">
+                <form action="" method="post">
+                  {% csrf_token %}
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <label class="form-label fw-semibold"
+                        >Tipo de movimiento</label
+                      >
+                      <select
+                        name="movement_type"
+                        id="movement"
+                        class="form-select"
+                      >
+                        <option value="CREDIT">
+                          💰 CREDITAR (ingresar saldo)
+                        </option>
+                        <option value="DEBIT">
+                          💸 DEBITAR (retirar saldo)
+                        </option>
+                      </select>
+                      <div class="form-text">
+                        Seleccione si desea agregar o retirar fondos.
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label fw-semibold">Monto</label>
+                      <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input
+                          type="text"
+                          step="0.01"
+                          class="form-control"
+                          id="believe"
+                          name="believe"
+                          placeholder="0.00"
+                          required
+                        />
+                      </div>
+                      <div class="form-text">
+                        Monto a acreditar o debitar de la billetera.
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label fw-semibold">Comision</label>
+                      <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input
+                          type="text"
+                          step="0.01"
+                          class="form-control"
+                          id="comi"
+                          name="comi"
+                          placeholder="0.00"
+                          required
+                        />
+                      </div>
+                      <div class="form-text">Monto de la comision</div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label fw-semibold">Descripción</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="description"
+                        name="description"
+                        placeholder="Motivo del movimiento"
+                        required
+                      />
+                    </div>
+                    <div class="col-12 mt-3">
+                      <hr />
+                      <div class="d-flex gap-2 justify-content-end">
+                        <button
+                          type="button"
+                          class="btn btn-secondary"
+                          onclick="window.history.back()"
+                        >
+                          <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-save"></i> Guardar movimiento
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- (Opcional) Alerta de ejemplo o tabla de movimientos recientes -->
+            <div
+              class="alert alert-info alert-dismissible fade show mt-3"
+              role="alert"
+            >
+              <i class="fas fa-info-circle"></i> <strong>Nota:</strong> Al
+              acreditar se suma el monto al saldo disponible. Al debitar se
+              resta, siempre que haya fondos suficientes.
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts necesarios -->
+    <script src="{% static 'js/decimales.js' %}"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-sRi4l7qPv4wIk+3pW5QYK6KpCqLEkS1UQYAjX+vC7mH2Fp2P4pC4E0TVJ5p5D2qS"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    <!-- Chart.js solo si se necesita -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </body>
+</html>

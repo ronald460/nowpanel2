@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/css/dashboard.css" />
+    <link rel="stylesheet" href="/static/css/datatables.css" />
+    <script src="/static/css/DataTables/datatables.js"></script>
+    <script src="/static/css/js/jszip.min.js"></script>
+    <script src="/static/css/js/pdfmake.min.js"></script>
+    <script src="/static/js/jquery-3.7.0.min.js"></script>
+    <script src="/static/css/js/vfs_fonts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <title>Conductores</title>
+  </head>
+  {% if user.is_authenticated == 0 %}
+  <meta http-equiv="refresh" content="0;url={% url 'login' %}" />
+  {% endif %} {% if messages%} {% for m in messages %}
+  <script>
+    Swal.fire({
+      title: "Felicidades",
+      text: "{{m}}",
+      icon: "success",
+    });
+  </script>
+  {% endfor %} {% endif %}
+  <body>
+    <div class="app-wrapper">
+      {% include 'header_1.html' %}
+
+      <main class="main-dashboard">
+        <h1>Listado de Conductores</h1>
+        <table id="DataTable">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Apellido</th>
+              <th>Cedula</th>
+              <th>Telefono</th>
+              <th>Correo</th>
+              <th>Status</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+        </table>
+
+        {% include 'footer.html' %}
+      </main>
+    </div>
+  </body>
+  <script src="/static/js/datatables.js"></script>
+  <script>
+    const API_URL = "/api/conductores/all_drivers/";
+    let dataTable;
+
+    $(document).ready(function () {
+      dataTable = $("#DataTable").DataTable({
+        responsive: true,
+        dom: '<"table-options"<"lb-container"lB>fr>tip',
+        lengthMenu: [10, 25, 50, -1],
+        buttons: [
+          {
+            extend: "excel",
+            filename: "ConductoresEXCEL",
+            exportOptions: {
+              columns: [0, 1, 2, 3, 4],
+            },
+          },
+          {
+            extend: "pdf",
+            filename: "ConductoresPDF",
+            exportOptions: {
+              columns: [0, 1, 2, 3, 4],
+            },
+          },
+        ],
+        ajax: {
+          url: API_URL,
+          type: "GET",
+          dataSrc: function (json) {
+            // Si usas la versión simple
+            if (json.data) {
+              return json.data;
+            }
+            // Si usas la versión con paginación
+            if (json.data && Array.isArray(json.data)) {
+              return json.data;
+            }
+            console.error("Formato de datos inesperado:", json);
+            return [];
+          },
+          error: function (xhr, status, error) {
+            console.error("Error en la petición:", error);
+            console.error("Status:", status);
+            console.error("Respuesta:", xhr.responseText);
+            alert("Error al cargar los datos. Revisa la consola.");
+          },
+        },
+        columns: [
+          { data: "name", defaultContent: "" },
+          { data: "last_name", defaultContent: "" },
+          { data: "document", defaultContent: "" },
+          { data: "phone", defaultContent: "" },
+          { data: "email", defaultContent: "" },
+          {
+            data: "driver_status",
+            render: function (data) {
+              switch (data) {
+                case "APPROVED":
+                  return '<span class="badge bg-success">Aprobado</span>';
+                case "PENDING":
+                  return '<span class="badge bg-warning">Pendiente</span>';
+                case "BLOCKED":
+                  return '<span class="badge bg-danger">Bloqueado</span>';
+                case "REJECTED":
+                  return '<span class="badge bg-secondary">Rechazado</span>';
+                case "CONTACTED":
+                  return '<span class="badge bg-secondary">Contactado</span>';
+                default:
+                  return (
+                    '<span class="badge bg-info">' +
+                    (data || "Desconocido") +
+                    "</span>"
+                  );
+              }
+            },
+          },
+          {
+            data: "working",
+            render: function (data) {
+              return data
+                ? '<span class="badge bg-danger">Trabajando</span>'
+                : '<span class="badge bg-success">Disponible</span>';
+            },
+          },
+          {
+            data: null,
+            searchable: false,
+            orderable: false,
+            render: function (data) {
+              return `
+                            <button class='actions edit' data-id='${data.public_id || data.id}'>
+                                <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' class='bi bi-check-circle' viewBox='0 0 16 16'><path d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16'/><path d='m10.97 4.97-.02.022-3.473 4.425-2.093-2.094a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05'/></svg>
+                            </button>
+                            <button class='actions delete' data-id='${data.public_id || data.id}'>
+                                <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' class='bi bi-person-bounding-box' viewBox='0 0 16 16'>
+                                    <path d='M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5'/>
+                                    <path d='M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0'/>
+                                </svg>
+                            </button>
+                            <button class='actions devol' data-id='${data.public_id || data.id}'>
+                                <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' class='bi bi-cash-stack' viewBox='0 0 16 16'> <path d='M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1zm7 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4'/><path d='M0 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V7a2 2 0 0 1-2-2z'/> </svg>
+                            </button>
+                        `;
+            },
+          },
+        ],
+        initComplete: function () {
+          // Delegación de eventos para botones
+          $("#DataTable tbody").on("click", ".edit", function () {
+            var id = $(this).data("id");
+            if (id) {
+              Swal.fire({
+                title: "Estás seguro?",
+                text: "Este Conductor se Aprobara",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "¡Sí, Apruebalo!",
+                cancelButtonText: "No",
+              }).then((result) => {
+                if (result.value) {
+                  window.location.href = "/active_driver/" + id;
+                }
+              });
+            } else {
+              console.error("ID no encontrado");
+            }
+          });
+
+          $("#DataTable tbody").on("click", ".delete", function () {
+            var id = $(this).data("id");
+            if (id) {
+              window.location.href = "/upload-photo/" + id;
+            } else {
+              console.error("ID no encontrado");
+            }
+          });
+          $("#DataTable tbody").on("click", ".devol", function () {
+            var id = $(this).data("id");
+            if (id) {
+              window.location.href = "/conductores_mov/" + id;
+            } else {
+              console.error("ID no encontrado");
+            }
+          });
+        },
+      });
+      setInterval(function () {
+        dataTable.ajax.reload(null, false);
+        console.log("Datos recargados automáticamente");
+      }, 30000);
+    });
+  </script>
+</html>

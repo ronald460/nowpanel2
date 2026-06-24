@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
+    <title>Cargar Foto | Panel de Conductor</title>
+    <!-- CSS Base + AdminLTE + Bootstrap + Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <!-- manteniendo compatibilidad con archivos locales (si existieran) -->
+    <link rel="stylesheet" href="/static/css/form/upload_photo.css" />
+    <link rel="stylesheet" href="/static/css/datatables.css" />
+    <link rel="stylesheet" href="/static/css/tooltip2.css" />
+    <!-- DataTables + plugins -->
+    <script src="/static/css/DataTables/datatables.js"></script>
+    <script src="/static/css/js/jszip.min.js"></script>
+    <script src="/static/css/js/pdfmake.min.js"></script>
+    <script src="/static/css/js/vfs_fonts.js"></script>
+    <!-- jQuery (siempre antes de Bootstrap JS) -->
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+      <!-- header y aside dinámicos (compatibilidad con templates) -->
+      {% include 'header.html' %} {% include 'aside.html' %}
+
+      <div class="content-wrapper" style="background-color: #f4f6f9">
+        <div class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1 class="m-0 text-dark">
+                  <i class="fas fa-id-card mr-2"></i>Gestión de conductor
+                </h1>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="#">Inicio</a></li>
+                  <li class="breadcrumb-item active">Cargar Foto</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="container-fluid">
+            <!-- TITULO PRINCIPAL de la pantalla (solicitado) -->
+            <div class="row mb-3">
+              <div class="col-12">
+                <div class="card card-outline card-primary shadow-sm">
+                  <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                    <h3 class="card-title">
+                      <i class="fas fa-camera-retro text-primary mr-2"></i>
+                      <strong>CARGAR FOTO DEL CONDUCTOR</strong>
+                    </h3>
+                    <div class="card-tools">
+                      <span class="badge badge-info p-2"
+                        ><i class="far fa-clock"></i> Actualización
+                        inmediata</span
+                      >
+                    </div>
+                  </div>
+                  <div class="card-body pt-2">
+                    <p class="text-muted mb-0">
+                      Complete el formulario para asociar una fotografía al
+                      perfil del conductor. Formatos permitidos: JPG, PNG, GIF.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PRIMER BLOQUE: Información personal + foto actual (mejorado con grid simétrico) -->
+            <div class="row mb-4">
+              <div class="col-md-12">
+                <div class="card card-widget shadow-sm">
+                  <div class="card-header bg-secondary bg-gradient">
+                    <h5 class="card-title">
+                      <i class="fas fa-user-circle"></i> Información del
+                      conductor
+                    </h5>
+                    <div class="card-tools">
+                      <button
+                        type="button"
+                        class="btn btn-tool"
+                        data-card-widget="collapse"
+                      >
+                        <i class="fas fa-minus"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="row g-4 align-items-start">
+                      <!-- Columna izquierda: foto actual -->
+                      <div
+                        class="col-md-4 col-lg-3 text-center text-md-start mb-4 mb-md-0"
+                      >
+                        <div class="card h-100 border-0 shadow-none">
+                          <div class="card-body p-2">
+                            <h6 class="text-uppercase text-secondary fw-bold">
+                              <i class="far fa-image"></i> Foto Actual
+                            </h6>
+                            <div class="d-flex justify-content-center mt-2">
+                              {% if conductor.photo %}
+                              <img
+                                src="{{ conductor.photo }}"
+                                alt="Foto del conductor"
+                                class="img-fluid img-thumbnail rounded-circle"
+                                style="
+                                  max-width: 180px;
+                                  max-height: 180px;
+                                  object-fit: cover;
+                                  border: 3px solid #007bff;
+                                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                                "
+                              />
+                              {% else %}
+                              <div
+                                class="alert alert-info w-100 text-center py-4"
+                                style="max-width: 220px"
+                              >
+                                <i class="fas fa-user-slash fa-2x mb-2"></i
+                                ><br />No hay foto registrada
+                              </div>
+                              {% endif %}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Columna derecha: inputs de datos personales (organizados en grid 2x2 mejorado) -->
+                      <div class="col-md-8 col-lg-9">
+                        <div class="row g-3">
+                          <div class="col-sm-6">
+                            <div class="form-group">
+                              <label class="fw-semibold"
+                                ><i class="fas fa-user"></i> Nombre</label
+                              >
+                              <input
+                                type="text"
+                                class="form-control bg-light"
+                                value="{{conductor.name}}"
+                                disabled
+                              />
+                            </div>
+                          </div>
+                          <div class="col-sm-6">
+                            <div class="form-group">
+                              <label class="fw-semibold"
+                                ><i class="fas fa-user-tag"></i> Apellido</label
+                              >
+                              <input
+                                type="text"
+                                class="form-control bg-light"
+                                value="{{conductor.last_name}}"
+                                disabled
+                              />
+                            </div>
+                          </div>
+                          <div class="col-sm-6">
+                            <div class="form-group">
+                              <label class="fw-semibold"
+                                ><i class="fas fa-id-card"></i> Cédula</label
+                              >
+                              <input
+                                type="text"
+                                class="form-control bg-light"
+                                value="{{conductor.document}}"
+                                disabled
+                              />
+                            </div>
+                          </div>
+                          <div class="col-sm-6">
+                            <div class="form-group">
+                              <label class="fw-semibold"
+                                ><i class="fas fa-envelope"></i> Correo
+                                electrónico</label
+                              >
+                              <input
+                                type="text"
+                                class="form-control bg-light"
+                                value="{{conductor.email}}"
+                                disabled
+                              />
+                            </div>
+                          </div>
+                          <div class="col-sm-6">
+                            <div class="form-group">
+                              <label class="fw-semibold"
+                                ><i class="fas fa-flag-checkered"></i> Estado /
+                                Status</label
+                              >
+                              <input
+                                type="text"
+                                class="form-control bg-light"
+                                value="{{conductor.driver_status}}"
+                                disabled
+                              />
+                            </div>
+                          </div>
+                          <!-- un espacio extra para balance visual (opcional) -->
+                          <div class="col-sm-6">
+                            <div class="form-group">
+                              <label class="fw-semibold"
+                                ><i class="fas fa-calendar-alt"></i> ID
+                                Interno</label
+                              >
+                              <input
+                                type="text"
+                                class="form-control bg-light"
+                                value="{{conductor.id|default:'---'}}"
+                                disabled
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SEGUNDO BLOQUE: formulario de carga de foto con inputs y botones perfectamente posicionados -->
+            <div class="row">
+              <div class="col-md-8 mx-auto">
+                <div class="card card-primary card-outline shadow">
+                  <div class="card-header">
+                    <h5 class="card-title">
+                      <i class="fas fa-upload"></i> Subir nueva fotografía
+                    </h5>
+                  </div>
+                  <form
+                    method="post"
+                    id="uploadForm"
+                    enctype="multipart/form-data"
+                    class="needs-validation"
+                    novalidate
+                  >
+                    {% csrf_token %}
+                    <div class="card-body">
+                      <!-- input file mejor posicionado (con diseño claro) -->
+                      <div class="form-group mb-4">
+                        <label for="image" class="form-label fw-bold text-dark"
+                          >Seleccionar archivo
+                          <span class="text-danger">*</span></label
+                        >
+                        <div class="input-group">
+                          <input
+                            type="file"
+                            class="form-control form-control-lg"
+                            id="image"
+                            name="image"
+                            accept="image/*"
+                            required
+                          />
+                          <label class="input-group-text bg-white"
+                            ><i class="fas fa-camera text-primary"></i
+                          ></label>
+                        </div>
+                        <div class="form-text text-muted">
+                          Formatos compatibles: JPG, JPEG, PNG, GIF. Tamaño
+                          máximo recomendado: 5MB.
+                        </div>
+                        <div class="invalid-feedback">
+                          Por favor seleccione una imagen válida.
+                        </div>
+                      </div>
+
+                      <!-- Previsualización opcional (interactivo con JS) -->
+                      <div
+                        id="previewContainer"
+                        class="text-center mb-3 d-none"
+                      >
+                        <img
+                          id="imagePreview"
+                          src="#"
+                          alt="Vista previa"
+                          class="img-thumbnail"
+                          style="max-height: 150px"
+                        />
+                        <p class="mt-1 small text-muted">
+                          Vista previa de la imagen seleccionada
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      class="card-footer d-flex justify-content-end gap-3 flex-wrap"
+                    >
+                      <!-- Botón Cancelar y Guardar bien alineados (diseño horizontal con separación) -->
+                      <button
+                        class="btn btn-outline-secondary px-4"
+                        type="button"
+                        id="cancelBtn"
+                      >
+                        <i class="fas fa-times-circle mr-1"></i> Cancelar
+                      </button>
+
+                      <button
+                        class="btn btn-primary px-5"
+                        type="submit"
+                        id="saveBtn"
+                      >
+                        <i class="fas fa-save mr-1"></i> Guardar foto
+                      </button>
+                    </div>
+                  </form>
+                </div>
+                <!-- Info adicional / ayuda -->
+                <div class="alert alert-light border mt-3 shadow-sm">
+                  <i class="fas fa-info-circle text-info"></i>
+                  <strong>Nota:</strong> La foto se actualizará en el perfil del
+                  conductor una vez guardada. Asegúrese de seleccionar una
+                  imagen con buena resolución.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts necesarios: Bootstrap 5, AdminLTE, plugins adicionales + preview -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-sR3sb4k6p4Z5N4W8Z3wC5z4zqx8kCqgP8g3EE3C3k5tZtJj2cCItU5b/M4SJ/KT"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Script para vista previa de imagen y validación amigable -->
+    <script>
+      (function () {
+        // Previsualización de la imagen seleccionada
+        const fileInput = document.getElementById("image");
+        const previewContainer = document.getElementById("previewContainer");
+        const previewImage = document.getElementById("imagePreview");
+
+        if (fileInput) {
+          fileInput.addEventListener("change", function (event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith("image/")) {
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                previewImage.src = e.target.result;
+                previewContainer.classList.remove("d-none");
+              };
+              reader.readAsDataURL(file);
+            } else {
+              // Si no hay archivo o no es imagen, ocultar preview
+              previewContainer.classList.add("d-none");
+              previewImage.src = "#";
+            }
+          });
+        }
+
+        // Botón cancelar: redirige o limpia formulario (funcionalidad estándar: limpiar input y preview)
+        const cancelBtn = document.getElementById("cancelBtn");
+        if (cancelBtn) {
+          cancelBtn.addEventListener("click", function (e) {
+            // Limpiar el campo de archivo y la vista previa
+            if (fileInput) {
+              fileInput.value = "";
+              previewContainer.classList.add("d-none");
+              previewImage.src = "#";
+            }
+            // Opcional: recargar página o redirigir a lista de conductores?
+            // Según el contexto original, el botón "Cancelar" podría llevar atrás.
+            // Implementamos comportamiento útil: volver atrás si hay historial, sino limpiar.
+            if (window.history.length > 1) {
+              if (
+                confirm(
+                  "¿Cancelar carga? Los cambios no guardados se perderán. Volver a la página anterior.",
+                )
+              ) {
+                window.history.back();
+              }
+            } else {
+              // Si no hay historial, solo limpia formulario y muestra notificación
+              alert(
+                "Formulario reiniciado. Puede seleccionar una nueva imagen.",
+              );
+            }
+          });
+        }
+
+        // Validación personalizada para el form (requerido)
+        const form = document.getElementById("uploadForm");
+        if (form) {
+          form.addEventListener("submit", function (event) {
+            const fileInputField = document.getElementById("image");
+            if (
+              !fileInputField ||
+              !fileInputField.files ||
+              fileInputField.files.length === 0
+            ) {
+              event.preventDefault();
+              alert("Por favor, seleccione una imagen antes de guardar.");
+              fileInputField.classList.add("is-invalid");
+              return false;
+            }
+            // Valida extensión
+            const allowedExtensions = [
+              "image/jpeg",
+              "image/png",
+              "image/gif",
+              "image/jpg",
+              "image/webp",
+            ];
+            const fileType = fileInputField.files[0].type;
+            if (!allowedExtensions.includes(fileType)) {
+              event.preventDefault();
+              alert(
+                "Formato de imagen no soportado. Use JPG, PNG, GIF o WEBP.",
+              );
+              fileInputField.classList.add("is-invalid");
+              return false;
+            }
+            fileInputField.classList.remove("is-invalid");
+            // Se puede agregar spinner de carga sutil
+            const submitBtn = document.querySelector("#saveBtn");
+            if (submitBtn) {
+              submitBtn.innerHTML =
+                '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+              submitBtn.disabled = true;
+            }
+            return true;
+          });
+        }
+
+        // Mejora visual: tooltips nativos de bootstrap 5 (si se requiere)
+        var tooltipTriggerList = [].slice.call(
+          document.querySelectorAll('[data-bs-toggle="tooltip"]'),
+        );
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Manejo de mensajes flash si los hubiera (Django messages) - por si se necesita compatibilidad
+        // no necesario pero se deja espacio para extender.
+      })();
+    </script>
+    <style>
+      /* Ajustes adicionales de posicionamiento y espaciado para inputs y elementos */
+      .content-wrapper .card .card-body .row.g-3 .form-group label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+        color: #2c3e66;
+      }
+      .card-widget .card-header {
+        background: #2c3e66 !important;
+        color: white;
+      }
+      .card-widget .card-header .card-title {
+        color: white;
+      }
+      .card-widget .card-header .btn-tool {
+        color: rgba(255, 255, 255, 0.8);
+      }
+      .bg-light:disabled,
+      .bg-light[disabled],
+      input.form-control.bg-light:disabled {
+        background-color: #e9ecef !important;
+        opacity: 0.9;
+        cursor: not-allowed;
+      }
+      .rounded-circle {
+        border-radius: 50% !important;
+      }
+      /* Responsive: en móviles la foto y los inputs se reordenan adecuadamente */
+      @media (max-width: 768px) {
+        .col-md-4,
+        .col-md-8 {
+          flex: 0 0 100%;
+          max-width: 100%;
+        }
+        .text-md-start {
+          text-align: center !important;
+        }
+      }
+      /* Botones en card footer con espacio coherente */
+      .card-footer .gap-3 {
+        gap: 1rem !important;
+      }
+      /* resaltar input file cuando está enfocado */
+      #image:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+      /* .parent-1, .parent-2 ya no se utilizan en esta estructura mejorada, pero respetamos la
+      limpieza del diseño sin perder funcionalidad. */
+    </style>
+    <!-- integración de estilos locales (posibles colisiones pero manteniendo compatibilidad) -->
+    <!-- Se asegura que cualquier estilo de upload_photo.css no rompa el grid, porque usamos bootstrap puro -->
+  </body>
+</html>
