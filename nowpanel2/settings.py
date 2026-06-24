@@ -46,7 +46,14 @@ INSTALLED_APPS = [
     'drivers',
     'travel',
     'transaction',
+    "anymail",
 ]
+
+EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+
+ANYMAIL = {
+    "RESEND_API_KEY": os.getenv('KEY_EMAIL') 
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -154,3 +161,17 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#cloudflare
+
+CLOUDFLARE_R2_KEY_ID = os.getenv('R2_ACCESS_KEY_ID') 
+CLOUDFLARE_R2_ACCESS_KEY = os.getenv('R2_SECRET_ACCESS_KEY') 
+CLOUDFLARE_R2_ACCOUNT_ID = os.getenv('CLOUDFLARE_ACCOUNT_ID') 
+CLOUDFLARE_R2_ENDPOINT = f"https://{CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+CLOUDFLARE_R2_BUCKET = os.getenv('R2_BUCKET_NAME')
+
+CLOUDFLARE_R2_PUBLIC_URL = f'https://pub-{CLOUDFLARE_R2_ACCOUNT_ID}.r2.dev'
+
+SESSION_EXPIRE_SECONDS = 28800
+SESSION_TIMEOUT_REDIRECT = '/login'
