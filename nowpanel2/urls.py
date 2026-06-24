@@ -25,6 +25,8 @@ urlpatterns = [
     path('', include('dashboard.urls')),
     path('', include('user.urls')),
     path('', include('drivers.urls')),
+    path('', include('travel.urls')),
+    path('', include('transaction.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_ROOT)

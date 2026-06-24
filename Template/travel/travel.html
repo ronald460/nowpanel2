@@ -1,0 +1,200 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Viajes</title>
+    <link rel="stylesheet" href="{% static 'css/datatables.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tooltip2.css' %}" />
+    <script src="{% static 'css/DataTables/datatables.js' %}"></script>
+    <script src="{% static 'css/js/jszip.min.js' %}"></script>
+    <script src="{% static 'css/js/pdfmake.min.js' %}"></script>
+    <script src="{% static 'css/js/js/vfs_fonts.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+  </head>
+  {% if user.is_authenticated == 0 %}
+  <meta http-equiv="refresh" content="0;url={% url 'login' %}" />
+  {% endif %} {% if messages%} {% for m in messages %}
+  <script>
+    Swal.fire({
+      title: "Felicidades",
+      text: "{{m}}",
+      icon: "success",
+    });
+  </script>
+  {% endfor %} {% endif %}
+  <body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+      {% include 'header.html' %} {% include 'aside.html' %}
+      <!-- Content -->
+      <div class="content-wrapper">
+        <div class="content">
+          <div class="container-fluid">
+            <main class="data-table">
+              <h1>Listado de Viajes</h1>
+              <table id="DataTable">
+                <thead>
+                  <tr>
+                    <th>Conductor</th>
+                    <th>Telf C</th>
+                    <th>Usuario</th>
+                    <th>Estatus</th>
+                    <th>Tipo Veh</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+              </table>
+            </main>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <!-- Scripts -->
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script src="/static/js/datatables.js"></script>
+  <script>
+    const API_URL = "/api/viajes/all_travels/";
+    let dataTable;
+
+    $(document).ready(function () {
+      dataTable = $("#DataTable").DataTable({
+        responsive: true,
+        dom: '<"table-options"<"lb-container"lB>fr>tip',
+        lengthMenu: [10, 25, 50, -1],
+        buttons: [
+          {
+            extend: "excel",
+            filename: "VIAJES-EXCEL",
+            exportOptions: {
+              columns: [0, 1, 2, 3, 4, 5, 6, 7],
+            },
+          },
+          {
+            extend: "pdf",
+            filename: "VIAJES-PDF",
+            exportOptions: {
+              columns: [0, 1, 2, 3, 4, 5, 6, 7],
+            },
+          },
+          {
+            text: "Reporte Diario",
+            className: "btn-new",
+            action: (e) => {
+              window.location.href =
+                "{% if is_admin %} /api/export-excel-report/ {% endif %}";
+            },
+          },
+        ],
+        ajax: {
+          url: API_URL,
+          type: "GET",
+          dataSrc: function (json) {
+            // Si usas la versión simple
+            if (json.data) {
+              return json.data;
+            }
+            // Si usas la versión con paginación
+            if (json.data && Array.isArray(json.data)) {
+              return json.data;
+            }
+            console.error("Formato de datos inesperado:", json);
+            return [];
+          },
+          error: function (xhr, status, error) {
+            console.error("Error en la petición:", error);
+            console.error("Status:", status);
+            console.error("Respuesta:", xhr.responseText);
+            alert("Error al cargar los datos. Revisa la consola.");
+          },
+        },
+        columns: [
+          { data: "d_name", defaultContent: "" },
+          { data: "d_phone", defaultContent: "" },
+          { data: "u_name", defaultContent: "" },
+          {
+            data: "status",
+            render: function (data) {
+              switch (data) {
+                case "COMPLETED":
+                  return '<span class="badge bg-success">Completado</span>';
+                case "REQUESTED":
+                  return '<span class="badge bg-warning">Requerido</span>';
+                case "CANCELLED":
+                  return '<span class="badge bg-danger">Cancelado</span>';
+                case "REJECTED":
+                  return '<span class="badge bg-secondary">Rechazado</span>';
+                case "IN_PROGRESS":
+                  return '<span class="badge bg-secondary">En Progreso</span>';
+                case "DRIVER_ACCEPTED":
+                  return '<span class="badge bg-secondary">Conductor Acept</span>';
+                case "NO_SHOW":
+                  return '<span class="badge bg-secondary">No se Presento</span>';
+                default:
+                  return (
+                    '<span class="badge bg-info">' +
+                    (data || "Desconocido") +
+                    "</span>"
+                  );
+              }
+            },
+          },
+          { data: "type", defaultContent: "" },
+          { data: "created_at", defaultContent: "" },
+          {
+            data: null,
+            searchable: false,
+            orderable: false,
+            render: function (data) {
+              return `
+                            <button class='actions edit' data-id='${data.public_id || data.id}'>
+                                <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' class='bi bi-info-circle-fill' viewBox='0 0 16 16'><path d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2'/></svg>
+                            </button>
+                        `;
+            },
+          },
+        ],
+        initComplete: function () {
+          $("#DataTable tbody").on("click", ".edit", function () {
+            var id = $(this).data("id");
+            if (id) {
+              window.location.href = "/details_travel/" + id;
+            } else {
+              console.error("ID no encontrado");
+            }
+          });
+        },
+      });
+    });
+    setInterval(function () {
+      dataTable.ajax.reload(null, false);
+      console.log("Datos recargados automáticamente");
+    }, 30000);
+  </script>
+</html>
