@@ -39,6 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    #-------apps------------
+    'dashboard',
+    'user',
+    'drivers',
 ]
 
 MIDDLEWARE = [
@@ -88,6 +93,14 @@ DATABASES = {
             'sslmode': os.environ.get('DB_SSL_MODE', 'require'),  # Para RDS
         }
     },
+    'legacy': {
+        'ENGINE': os.getenv('DB_ENGINE_LEGACY'),
+        'NAME': os.getenv('DB_NAME_LEGACY'),
+        'USER': os.getenv('DB_USER_LEGACY'),
+        'PASSWORD': os.getenv('DB_PASSWORD_LEGACY'),
+        'HOST': os.getenv('DB_HOST_LEGACY'),
+        'PORT': os.getenv('DB_PORT_LEGACY'),
+    },
 }
 
 
@@ -115,7 +128,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-es'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Caracas'
 
 USE_I18N = True
 
