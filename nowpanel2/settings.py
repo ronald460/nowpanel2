@@ -100,6 +100,9 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD_LEGACY', ''),
         'HOST': os.getenv('DB_HOST_LEGACY', ''),
         'PORT': os.getenv('DB_PORT_LEGACY', ''),
+        'OPTIONS': {
+            'sslmode': os.environ.get('DB_SSL_MODE', 'require'),  # Para RDS
+        }
     },
 }
 
