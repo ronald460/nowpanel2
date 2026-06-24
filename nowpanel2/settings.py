@@ -116,7 +116,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+CLOUDFLARE_NOW_2 = os.getenv('CLOUDFLARE_URL_PUBILC_STATIC_2', '')
+
+STATIC_URL = CLOUDFLARE_NOW_2
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
