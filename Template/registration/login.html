@@ -1,11 +1,61 @@
+{% load static %}
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Now-Panel</title>
+    <link rel="stylesheet" href="{% static 'css/index.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/Login.css' %}" />
   </head>
   <body>
-    <h3>HELLO WORLD</h3>
+    <section class="login-container">
+      <form class="login-form" method="post">
+        {% csrf_token %}
+        <div class="login">
+          <div>
+            <img
+              class="banner"
+              src="{% static 'images/now-logo-1.png' %}"
+              alt="now"
+            />
+          </div>
+
+          <div class="input-container">
+            <input name="username" id="username" required type="text" />
+            <label for="username">Nombre de usuario</label>
+            <line></line>
+          </div>
+
+          <div class="input-container">
+            <input name="password" id="password" required type="password" />
+            <label for="password">Contraseña</label>
+            <line></line>
+          </div>
+        </div>
+
+        <button type="submit" value="Ingresar">
+          Iniciar sesión
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon icon-tabler icon-tabler-send-2"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path
+              d="M4.698 4.034l16.302 7.966l-16.302 7.966a.503 .503 0 0 1 -.546 -.124a.555 .555 0 0 1 -.12 -.568l2.468 -7.274l-2.468 -7.274a.555 .555 0 0 1 .12 -.568a.503 .503 0 0 1 .546 -.124z"
+            />
+            <path d="M6.5 12h14.5" />
+          </svg>
+        </button>
+      </form>
+    </section>
   </body>
 </html>
