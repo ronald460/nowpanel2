@@ -2,13 +2,26 @@
   "builds": [
     {
       "src": "nowpanel2/wsgi.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.10",
+        "pip": ["--requirement", "requirements.txt"]
+      }
+    },
+    {
+      "src": "static/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "nowpanel2.wsgi.py"
+      "dest": "nowpanel2/wsgi.py"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
     }
   ]
 }
