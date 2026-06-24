@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "nowpanel2/wsgi.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "nowpanel2.wsgi.py"
+    }
+  ]
+}
