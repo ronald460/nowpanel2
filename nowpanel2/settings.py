@@ -152,8 +152,12 @@ USE_TZ = True
 
 CLOUDFLARE_NOW_2 = os.getenv('CLOUDFLARE_URL_PUBILC_STATIC_2', '')
 
-STATIC_URL = CLOUDFLARE_NOW_2
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
