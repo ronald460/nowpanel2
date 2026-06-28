@@ -84,7 +84,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'nowpanel2.wsgi.application'
+WSGI_APPLICATION = 'nowpanel2.wsgi.app'
 
 
 # Database
