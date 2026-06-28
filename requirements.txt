@@ -7,4 +7,4 @@ xlsxwriter
 pytz
 django-anymail
 gunicorn
-setuptools>=65.0.0
+setuptools
