@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Página no encontrada - Error 404</title>
+    <style>
+      /* Reset y configuración base */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 60px 40px;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.5s ease-out;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Decoración superior */
+      .container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+        background-size: 200% 100%;
+        animation: gradientMove 3s ease infinite;
+      }
+
+      /* Animación de entrada */
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Animación del gradiente en la barra */
+      @keyframes gradientMove {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      /* Número 404 */
+      .error-code {
+        font-size: 120px;
+        font-weight: 900;
+        line-height: 1;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 10px;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      /* Icono de error */
+      .error-icon {
+        font-size: 60px;
+        margin-bottom: 10px;
+        display: block;
+      }
+
+      /* Título */
+      h1 {
+        font-size: 28px;
+        color: #2d3748;
+        margin-bottom: 15px;
+        font-weight: 700;
+      }
+
+      /* Descripción */
+      p {
+        color: #4a5568;
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+      }
+
+      /* Contenedor de botones */
+      .actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      /* Botón primario */
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 30px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+
+      /* Botón secundario */
+      .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 30px;
+        background: transparent;
+        color: #4a5568;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        border: 2px solid #e2e8f0;
+      }
+
+      .btn-secondary:hover {
+        border-color: #667eea;
+        color: #667eea;
+        transform: translateY(-2px);
+      }
+
+      /* Enlaces adicionales */
+      .links {
+        margin-top: 25px;
+        padding-top: 25px;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .links a {
+        color: #718096;
+        text-decoration: none;
+        font-size: 14px;
+        transition: color 0.3s ease;
+      }
+
+      .links a:hover {
+        color: #667eea;
+      }
+
+      /* Responsive */
+      @media (max-width: 480px) {
+        .container {
+          padding: 40px 20px;
+        }
+
+        .error-code {
+          font-size: 80px;
+        }
+
+        .error-icon {
+          font-size: 40px;
+        }
+
+        h1 {
+          font-size: 22px;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+          padding: 10px 20px;
+          font-size: 14px;
+          width: 100%;
+          justify-content: center;
+        }
+
+        .actions {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Decoración superior con animación -->
+      <span class="error-icon">🔍</span>
+      <div class="error-code">404</div>
+      <h1>¡Página no encontrada!</h1>
+      <p>
+        Lo sentimos, la página que estás buscando no existe, fue movida o
+        eliminada. Pero no te preocupes, tenemos muchas otras cosas interesantes
+        para ti.
+      </p>
+
+      <!-- Acciones principales -->
+      <div class="actions">
+        <a href="/" class="btn-primary">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"
+            />
+          </svg>
+          Volver al inicio
+        </a>
+        <a
+          href="/home/"
+          onclick="
+            history.back();
+            return false;
+          "
+          class="btn-secondary"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          Página anterior
+        </a>
+      </div>
+    </div>
+
+    <!-- Script para manejar el botón de volver -->
+    <script>
+      // Prevenir que el botón de "Página anterior" no funcione si no hay historial
+      document.addEventListener("DOMContentLoaded", function () {
+        const backButton = document.querySelector(".btn-secondary");
+        if (backButton) {
+          backButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.href = "/";
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
