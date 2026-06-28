@@ -1,0 +1,107 @@
+[tooltip] {
+    position: relative;
+}
+
+[tooltip]::after {
+    position: absolute;
+    content: attr(tooltip);
+    padding: 10px;
+    white-space: nowrap;
+    background-color: rgba(0, 0, 0, .75);
+    backdrop-filter: blur(9px);
+    transition: all 200ms ease;
+    border-radius: 4px;
+    top: 3rem;
+    font-size: 13px;
+    pointer-events: none;
+    display: none;
+    color: #fff;
+}
+
+[tooltip]::before {
+    position: absolute;
+    bottom: -3px;
+    content: '';
+    width: 0; 
+    height: 0; 
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 7px solid rgba(0, 0, 0, .75);
+    display: none;
+}
+
+[tooltip]:hover::after, [tooltip]:hover::before {
+    animation: Tooltip 200ms ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+[tooltip='Cerrar sesión']::after {
+    right: 0;
+}
+
+[tooltip='Tasa actual']::after {
+    left: 28px;
+    top: 45px;
+}
+
+[tooltip='Tasa actual']::before {
+    left: 50%;
+}
+
+[tooltip='']::before,
+[tooltip='']::after {
+    display: none !important;
+}
+/* 
+[menu-item] {
+    position: relative;
+}
+
+[menu-item]::after {
+    content: attr(menu-item);
+    position: absolute;
+    left: 80px;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, .75);
+    border-radius: 4px;
+    color: #fff;
+    font-size: 13px;
+    pointer-events: none;
+    backdrop-filter: blur(9px);
+    white-space: nowrap;
+    display: none;
+}
+
+[menu-item]::before {
+    position: absolute;
+    top: 50%;
+    left: 72px;
+    content: '';
+    width: 0; 
+    height: 0; 
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 7px solid rgba(0, 0, 0, .75);
+    transform: rotate(-90deg);
+    display: none;
+}
+
+[menu-item]:hover::after, [menu-item]:hover::before {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: Tooltip 200ms ease;
+}
+*/
+
+@keyframes Tooltip {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

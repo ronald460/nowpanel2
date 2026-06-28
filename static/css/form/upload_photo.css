@@ -1,0 +1,57 @@
+.parent-1 {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.div2 {
+  grid-column-start: 2;
+}
+
+.div3 {
+  grid-row-start: 2;
+}
+
+.div4 {
+  grid-row-start: 2;
+}
+
+.div5 {
+  grid-row-start: 2;
+}
+
+.div6 {
+  grid-row-start: 3;
+}
+
+.div7 {
+  grid-column-start: 3;
+  grid-row-start: 3;
+}
+
+.parent-2 {
+  display: grid;
+  max-width: 100%;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.parent-2 .div1 {
+  grid-column: span 3 / span 3;
+}
+
+.parent-2 .div8 {
+  grid-row-start: 2;
+}
+
+.parent-2 .div3 {
+  grid-column-start: 3;
+  grid-row-start: 2;
+}
+
+.uploadForm {
+  max-width: 100%;
+}

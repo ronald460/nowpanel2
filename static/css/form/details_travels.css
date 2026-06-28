@@ -1,0 +1,92 @@
+.parent {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  gap: 8px;
+}
+
+.div1 {
+  grid-column: span 5 / span 5;
+}
+
+.div2 {
+  grid-row-start: 2;
+}
+
+.div3 {
+  grid-row-start: 2;
+}
+
+.div4 {
+  grid-row-start: 2;
+}
+
+.div5 {
+  grid-row-start: 2;
+}
+
+.div6 {
+  grid-row-start: 2;
+}
+
+.div7 {
+  grid-column: span 5 / span 5;
+}
+
+.div8 {
+  grid-row-start: 4;
+}
+
+.div9 {
+  grid-row-start: 4;
+}
+
+.div10 {
+  grid-row-start: 4;
+}
+
+.div11 {
+  grid-row-start: 4;
+}
+
+.div12 {
+  grid-row-start: 4;
+}
+
+.div13 {
+  grid-column: span 5 / span 5;
+}
+
+.div14 {
+  grid-column: span 5 / span 5;
+  grid-row-start: 6;
+}
+
+.div15 {
+  grid-column: span 5 / span 5;
+  grid-row-start: 7;
+}
+
+.div16 {
+  grid-row-start: 8;
+}
+
+.div17 {
+  grid-row-start: 8;
+}
+
+.div18 {
+  grid-row-start: 8;
+}
+
+.div19 {
+  grid-row-start: 8;
+}
+
+.div20 {
+  grid-row-start: 8;
+}
+
+.div21 {
+  grid-column: span 5 / span 5;
+}
