@@ -1,1 +1,1 @@
-web: gunicorn nowpanel2.wsgi:application
+web: gunicorn now_panel_2.wsgi:application
