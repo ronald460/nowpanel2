@@ -18,6 +18,12 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework.routers import DefaultRouter
+from core.api import EmailViewSet, EmailLabelViewSet
+
+router = DefaultRouter()
+router.register(r'emails', EmailViewSet, basename='email')
+router.register(r'labels', EmailLabelViewSet, basename='label')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +33,8 @@ urlpatterns = [
     path('', include('drivers.urls')),
     path('', include('travel.urls')),
     path('', include('transaction.urls')),
+    path('', include('core.urls')),
+    path('api/', include(router.urls)),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_ROOT)

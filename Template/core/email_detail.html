@@ -1,0 +1,77 @@
+{% extends 'core/base.html' %} {% block content %}
+<div class="email-detail-container" id="emailDetail">
+  <div class="email-detail-header">
+    <button class="back-btn" id="backBtn">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <div class="email-actions">
+      <button class="action-btn" id="replyBtn">
+        <i class="fas fa-reply"></i> Responder
+      </button>
+      <button class="action-btn" id="replyAllBtn">
+        <i class="fas fa-reply-all"></i> Responder a todos
+      </button>
+      <button class="action-btn" id="forwardBtn">
+        <i class="fas fa-forward"></i> Reenviar
+      </button>
+      <button class="action-btn" id="archiveDetailBtn">
+        <i class="fas fa-archive"></i>
+      </button>
+      <button class="action-btn" id="deleteDetailBtn">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="email-detail-body">
+    <div class="email-header-info">
+      <div class="email-sender">
+        <img
+          src="https://ui-avatars.com/api/?name={{ email.sender }}&background=4285f4&color=fff"
+          alt="Sender"
+        />
+        <div>
+          <strong id="detailSender">{{ email.sender }}</strong>
+          <span id="detailDate">{{ email.sent_at|date:"d/m/Y H:i" }}</span>
+        </div>
+      </div>
+      <div class="email-subject" id="detailSubject">
+        <h2>{{ email.subject }}</h2>
+      </div>
+      <div class="email-recipients">
+        <span
+          ><strong>Para:</strong>
+          <span id="detailTo">{{ email.recipients|join:", " }}</span></span
+        >
+        {% if email.cc %}
+        <span
+          ><strong>Cc:</strong>
+          <span id="detailCc">{{ email.cc|join:", " }}</span></span
+        >
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="email-body-content" id="detailBody">
+      {% if email.body_html %} {{ email.body_html|safe }} {% else %}
+      <pre>{{ email.body_text }}</pre>
+      {% endif %}
+    </div>
+
+    {% if email.attachments %}
+    <div class="email-attachments">
+      <h4>Adjuntos</h4>
+      <ul>
+        {% for attachment in email.attachments %}
+        <li>
+          <i class="fas fa-paperclip"></i>
+          <a href="#">{{ attachment.name }}</a>
+          <span>({{ attachment.size }})</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

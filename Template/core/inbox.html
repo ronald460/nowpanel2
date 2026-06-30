@@ -1,0 +1,34 @@
+{% extends 'core/base.html' %} {% block content %}
+<div class="email-list-container">
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <input type="checkbox" id="selectAll" />
+      <button class="toolbar-btn" id="refreshBtn">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+      <button class="toolbar-btn" id="archiveSelected">
+        <i class="fas fa-archive"></i>
+      </button>
+      <button class="toolbar-btn" id="deleteSelected">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+    <div class="toolbar-right">
+      <button class="toolbar-btn" id="markReadSelected">
+        <i class="fas fa-check-double"></i>
+      </button>
+      <button class="toolbar-btn" id="markUnreadSelected">
+        <i class="fas fa-envelope"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="email-list" id="emailList">
+    <!-- Los correos se cargan dinámicamente con JavaScript -->
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      Cargando correos...
+    </div>
+  </div>
+</div>
+{% endblock %}

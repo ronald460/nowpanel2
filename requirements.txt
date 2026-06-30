@@ -8,3 +8,6 @@ pytz
 django-anymail
 gunicorn
 setuptools
+djangorestframework
+django-cors-headers
+django-anymail[resend]

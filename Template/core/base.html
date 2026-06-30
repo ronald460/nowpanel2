@@ -1,0 +1,134 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Now- Email</title>
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="{% static 'css/email.css' %}" />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="logo">
+          <i class="fas fa-envelope"></i>
+          <h1>Now-Email</h1>
+        </div>
+
+        <button class="compose-btn" id="composeBtn">
+          <i class="fas fa-pen"></i> Redactar
+        </button>
+
+        <nav class="nav-menu">
+          <a href="#" class="nav-item active" data-view="inbox">
+            <i class="fas fa-inbox"></i>
+            <span>Recibidos</span>
+            <span class="badge" id="inboxCount">0</span>
+          </a>
+          <a href="#" class="nav-item" data-view="starred">
+            <i class="fas fa-star"></i>
+            <span>Destacados</span>
+          </a>
+          <a href="#" class="nav-item" data-view="snoozed">
+            <i class="fas fa-clock"></i>
+            <span>Posponer</span>
+          </a>
+          <a href="#" class="nav-item" data-view="sent">
+            <i class="fas fa-paper-plane"></i>
+            <span>Enviados</span>
+          </a>
+          <a href="#" class="nav-item" data-view="drafts">
+            <i class="fas fa-file-alt"></i>
+            <span>Borradores</span>
+          </a>
+          <a href="#" class="nav-item" data-view="archived">
+            <i class="fas fa-archive"></i>
+            <span>Archivados</span>
+          </a>
+          <a href="#" class="nav-item" data-view="trash">
+            <i class="fas fa-trash"></i>
+            <span>Papelera</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-info">
+            <img
+              src="https://ui-avatars.com/api/?name={{ user.username }}&background=4285f4&color=fff"
+              alt="Avatar"
+            />
+            <span>{{ user.username }}</span>
+          </div>
+          <a href="{% url 'logout' %}" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+          </a>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content" id="mainContent">
+        <!-- El contenido se renderiza dinámicamente -->
+        <div id="contentArea">{% block content %}{% endblock %}</div>
+      </main>
+    </div>
+
+    <!-- Modal para redactar -->
+    <div class="modal" id="composeModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Nuevo mensaje</h2>
+          <button class="close-btn" id="closeCompose">×</button>
+        </div>
+        <form id="composeForm">
+          {% csrf_token %}
+          <input
+            type="email"
+            id="toInput"
+            placeholder="Destinatarios"
+            required
+          />
+          <input type="text" id="subjectInput" placeholder="Asunto" />
+          <div class="compose-options">
+            <button type="button" id="ccToggle">Cc</button>
+            <button type="button" id="bccToggle">Cco</button>
+          </div>
+          <div id="ccContainer" style="display: none">
+            <input type="text" id="ccInput" placeholder="Cc" />
+          </div>
+          <div id="bccContainer" style="display: none">
+            <input type="text" id="bccInput" placeholder="Cco" />
+          </div>
+          <div id="editorContainer"></div>
+          <div class="compose-footer">
+            <button type="submit" class="send-btn">
+              <i class="fas fa-paper-plane"></i> Enviar
+            </button>
+            <button type="button" class="draft-btn" id="saveDraftBtn">
+              <i class="fas fa-save"></i> Guardar borrador
+            </button>
+            <button type="button" class="discard-btn" id="discardBtn">
+              Descartar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="{% static 'js/nowemail.js' %}"></script>
+  </body>
+</html>

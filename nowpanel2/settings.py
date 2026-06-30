@@ -47,12 +47,21 @@ INSTALLED_APPS = [
     'travel',
     'transaction',
     "anymail",
+    "rest_framework",
+    'corsheaders',
+    'core',
 ]
 
-EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
-
 ANYMAIL = {
-    "RESEND_API_KEY": os.getenv('KEY_EMAIL') 
+    "RESEND_API_KEY": os.getenv('KEY_EMAIL'), 
+    "RESEND_INBOUND_SECRET": os.getenv('RESEND_INBOUND_SECRET'),
+}
+
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+
+# URLs para webhooks de Resend
+ANYMAIL_WEBHOOKS_URLS = {
+    "resend": os.getenv('URL_INBOUND'),
 }
 
 MIDDLEWARE = [
