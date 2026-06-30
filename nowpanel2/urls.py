@@ -35,6 +35,7 @@ urlpatterns = [
     path('', include('transaction.urls')),
     path('', include('core.urls')),
     path('api/', include(router.urls)),
+    path('anymail/', include('anymail.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_ROOT)
