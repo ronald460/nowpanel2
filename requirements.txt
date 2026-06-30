@@ -11,3 +11,4 @@ setuptools
 djangorestframework
 django-cors-headers
 django-anymail[resend]
+requests

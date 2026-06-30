@@ -27,6 +27,7 @@ class Email(models.Model):
     is_draft = models.BooleanField(default=False)
     is_sent = models.BooleanField(default=False)
     is_starred = models.BooleanField(default=False)  # Nuevo campo
+    resend_email_id = models.CharField(max_length=255, blank=True, null=True)
     
     # Identificadores externos
     message_id = models.CharField(max_length=255, blank=True)
