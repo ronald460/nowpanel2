@@ -26,5 +26,5 @@ urlpatterns = [
     path('api/toggle-star/', views.toggle_star, name='toggle_star'),
     path('api/unread-count/', views.unread_count, name='unread_count'),
 
-    path('resend-webhook/', views.resend_webhook, name='resend_webhook'),
+    path('anymail/resend/inbound/', views.resend_webhook, name='resend_webhook'),
 ]
