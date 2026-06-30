@@ -26,7 +26,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://nowpanel2.onrender.com']
+ALLOWED_HOSTS = ['nowpanel2.onrender.com']
 LOGIN_REDIRECT_URL = '/home'
 LOGOUT_REDIRECT_URL = '/login'
 
@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'core',
 ]
+
+EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
 
 ANYMAIL = {
     "RESEND_API_KEY": os.getenv('KEY_EMAIL'), 
