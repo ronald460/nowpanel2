@@ -25,4 +25,6 @@ urlpatterns = [
     path('api/permanent-delete/', views.permanent_delete_email, name='permanent_delete'),
     path('api/toggle-star/', views.toggle_star, name='toggle_star'),
     path('api/unread-count/', views.unread_count, name='unread_count'),
+
+    path('resend-webhook/', views.resend_webhook, name='resend_webhook'),
 ]

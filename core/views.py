@@ -2,9 +2,14 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from .models import Email, EmailLabel
-from django.contrib.auth.models import User
+from .models import Email
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.conf import settings
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Vistas para las páginas principales
 @login_required
@@ -178,3 +183,101 @@ def unread_count(request):
         is_draft=False
     ).count()
     return JsonResponse({'unread_count': count})
+
+@csrf_exempt
+def resend_webhook(request):
+    """Maneja los webhooks de Resend para correos entrantes"""
+    
+    # Verificar que sea una petición POST
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+    try:
+        # Obtener los datos del webhook
+        data = json.loads(request.body)
+        logger.info(f"📨 Webhook recibido: {data}")
+        
+        # Verificar el secret (opcional pero recomendado)
+        webhook_secret = settings.ANYMAIL.get('RESEND_INBOUND_SECRET')
+        if webhook_secret:
+            signature = request.headers.get('Resend-Signature')
+            # Si tienes el secret, verifica la firma aquí
+            # Por ahora lo dejamos sin verificar para pruebas
+        
+        # Verificar que sea un evento de correo recibido
+        event_type = data.get('type')
+        if event_type != 'email.received':
+            logger.info(f"Evento ignorado: {event_type}")
+            return JsonResponse({'status': 'ignored'}, status=200)
+        
+        # Extraer los datos del correo
+        email_data = data.get('data', {})
+        
+        # Procesar el correo
+        procesar_correo_webhook(email_data)
+        
+        return JsonResponse({'status': 'success'}, status=200)
+        
+    except json.JSONDecodeError:
+        logger.error("❌ Error: JSON inválido")
+        return JsonResponse({'error': 'JSON inválido'}, status=400)
+    except Exception as e:
+        logger.error(f"❌ Error procesando webhook: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=500)
+
+def procesar_correo_webhook(email_data):
+    """Procesa los datos del correo recibido"""
+    try:
+        # Extraer datos
+        sender_email = email_data.get('from', '')
+        subject = email_data.get('subject', '')
+        recipients = email_data.get('to', [])
+        body_text = email_data.get('text', '')
+        body_html = email_data.get('html', '')
+        message_id = email_data.get('id', '')
+        
+        logger.info(f"📧 Correo recibido de: {sender_email}")
+        logger.info(f"Asunto: {subject}")
+        
+        # Buscar al usuario destinatario
+        from django.contrib.auth.models import User
+        
+        # Si hay múltiples destinatarios, buscar el primero que coincida con un usuario
+        user = None
+        if recipients:
+            if isinstance(recipients, list):
+                for recipient in recipients:
+                    try:
+                        user = User.objects.get(email=recipient)
+                        break
+                    except User.DoesNotExist:
+                        continue
+            else:
+                try:
+                    user = User.objects.get(email=recipients)
+                except User.DoesNotExist:
+                    pass
+        
+        if not user:
+            logger.warning(f"⚠️ No se encontró usuario para: {recipients}")
+            return
+        
+        # Guardar el correo en la base de datos
+        from .models import Email
+        
+        email = Email.objects.create(
+            user=user,
+            subject=subject or '',
+            sender=sender_email,
+            recipients=recipients if isinstance(recipients, list) else [recipients],
+            body_text=body_text or '',
+            body_html=body_html or '',
+            is_sent=False,
+            message_id=message_id,
+        )
+        
+        logger.info(f"✅ Correo guardado con ID: {email.id}")
+        
+    except Exception as e:
+        logger.error(f"❌ Error guardando correo: {str(e)}")
+        raise
