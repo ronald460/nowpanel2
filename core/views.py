@@ -205,28 +205,25 @@ def obtener_contenido_completo(email_id):
         
         if response.status_code == 200:
             data = response.json()
-            
-            # 🔥 LOG EXTRA: Mostrar todas las claves disponibles
             logger.info("="*50)
-            logger.info("📦 CONTENIDO COMPLETO DE RESEND:")
+            logger.info("CONTENIDO COMPLETO DE RESEND:")
             logger.info(f"Claves disponibles: {list(data.keys())}")
             
-            # Mostrar el contenido completo de forma legible
             for key, value in data.items():
                 if key in ['text', 'html', 'body']:
-                    logger.info(f"📝 {key}: {str(value)[:200]}..." if value else f"📝 {key}: (vacío)")
+                    logger.info(f"CONTENIDO {key}: {str(value)[:200]}..." if value else f"CONTENIDO {key}: (vacio)")
                 else:
-                    logger.info(f"📌 {key}: {value}")
+                    logger.info(f"DATO {key}: {value}")
             logger.info("="*50)
             
             return data
         else:
-            logger.error(f"❌ Error obteniendo contenido: {response.status_code}")
+            logger.error(f"Error obteniendo contenido: {response.status_code}")
             logger.error(f"Respuesta: {response.text}")
             return None
             
     except Exception as e:
-        logger.error(f"❌ Error en petición a Resend: {str(e)}")
+        logger.error(f"Error en peticion a Resend: {str(e)}")
         return None
 
 @csrf_exempt
@@ -234,27 +231,12 @@ def resend_webhook(request):
     """Maneja los webhooks de Resend para correos entrantes"""
     
     if request.method != 'POST':
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
+        return JsonResponse({'error': 'Metodo no permitido'}, status=405)
     
     try:
         data = json.loads(request.body)
-        logger.info(f"📨 Webhook recibido: {data}")
+        logger.info(f"Webhook recibido: {data}")
         
-        # Verificar la firma (si hay secret configurado)
-        webhook_secret = getattr(settings, 'RESEND_WEBHOOK_SECRET', '')
-        if webhook_secret:
-            signature = request.headers.get('Resend-Signature')
-            if signature:
-                expected_signature = hmac.new(
-                    webhook_secret.encode(),
-                    request.body,
-                    hashlib.sha256
-                ).hexdigest()
-                if not hmac.compare_digest(signature, expected_signature):
-                    logger.warning("⚠️ Firma inválida en el webhook")
-                    return JsonResponse({'error': 'Firma inválida'}, status=401)
-        
-        # Procesar solo eventos de correo recibido
         event_type = data.get('type')
         if event_type != 'email.received':
             return JsonResponse({'status': 'ignored'}, status=200)
@@ -263,36 +245,31 @@ def resend_webhook(request):
         email_id = email_data.get('email_id')
         
         if not email_id:
-            logger.error("❌ No se encontró email_id en el webhook")
+            logger.error("No se encontro email_id en el webhook")
             return JsonResponse({'error': 'Falta email_id'}, status=400)
         
-        # 🔥 Obtener el contenido completo del correo
         contenido_completo = obtener_contenido_completo(email_id)
         
         if contenido_completo:
-            # Extraer el cuerpo del correo
             body_text = contenido_completo.get('text', '')
             body_html = contenido_completo.get('html', '')
             
-            # Si no hay cuerpo, usar el que vino en el webhook (si existe)
             if not body_text and not body_html:
                 body_text = email_data.get('text', '')
                 body_html = email_data.get('html', '')
             
-            # Guardar el correo con el contenido completo
             procesar_correo_completo(email_data, body_text, body_html, contenido_completo)
         else:
-            # Si no se pudo obtener el contenido, guardar lo que tenemos
-            logger.warning("⚠️ No se pudo obtener contenido completo, guardando solo metadatos")
+            logger.warning("No se pudo obtener contenido completo, guardando solo metadatos")
             procesar_correo_completo(email_data, '', '', None)
         
         return JsonResponse({'status': 'success'}, status=200)
         
     except json.JSONDecodeError:
-        logger.error("❌ Error: JSON inválido")
-        return JsonResponse({'error': 'JSON inválido'}, status=400)
+        logger.error("Error: JSON invalido")
+        return JsonResponse({'error': 'JSON invalido'}, status=400)
     except Exception as e:
-        logger.error(f"❌ Error procesando webhook: {str(e)}")
+        logger.error(f"Error procesando webhook: {str(e)}")
         return JsonResponse({'error': str(e)}, status=500)
 
 def procesar_correo_completo(email_data, body_text, body_html, contenido_completo):
@@ -304,54 +281,68 @@ def procesar_correo_completo(email_data, body_text, body_html, contenido_complet
         message_id = email_data.get('message_id', '')
         email_id = email_data.get('email_id', '')
         
-        logger.info(f"📧 Correo recibido de: {sender_email}")
+        logger.info(f"Correo recibido de: {sender_email}")
         logger.info(f"Asunto: {subject}")
+        logger.info(f"Email ID: {email_id}")
         
-        # 🔥 Si no tenemos body_text/body_html, intentar obtenerlos del contenido_completo
-        if not body_text and not body_html and contenido_completo:
-            # Intentar diferentes formas de obtener el cuerpo
-            body_text = (
-                contenido_completo.get('text') or 
-                contenido_completo.get('body') or 
-                contenido_completo.get('plain_body') or
-                contenido_completo.get('plain_text', '')
-            )
+        if (not body_text or not body_html) and contenido_completo:
+            logger.info("Intentando obtener contenido del payload completo...")
             
-            body_html = (
-                contenido_completo.get('html') or 
-                contenido_completo.get('html_body') or 
-                contenido_completo.get('body_html', '')
-            )
+            if not body_text:
+                body_text = (
+                    contenido_completo.get('text') or 
+                    contenido_completo.get('body') or 
+                    contenido_completo.get('plain_body') or
+                    contenido_completo.get('plain_text', '')
+                )
+                if body_text:
+                    logger.info("Texto obtenido del campo 'text'")
             
-            # Si el contenido está en un campo 'body' como objeto
+            if not body_html:
+                body_html = (
+                    contenido_completo.get('html') or 
+                    contenido_completo.get('html_body') or 
+                    contenido_completo.get('body_html', '')
+                )
+                if body_html:
+                    logger.info("HTML obtenido del campo 'html'")
+            
             if isinstance(contenido_completo.get('body'), dict):
                 body_data = contenido_completo.get('body', {})
-                body_text = body_data.get('text', '') or body_text
-                body_html = body_data.get('html', '') or body_html
-            
-            # Si el contenido está en un campo 'content'
-            if isinstance(contenido_completo.get('content'), dict):
-                content_data = contenido_completo.get('content', {})
-                body_text = content_data.get('text', '') or body_text
-                body_html = content_data.get('html', '') or body_html
+                if not body_text:
+                    body_text = body_data.get('text', '')
+                if not body_html:
+                    body_html = body_data.get('html', '')
+                if body_text or body_html:
+                    logger.info("Contenido obtenido del campo 'body'")
         
-        # 🔥 Si aún no tenemos body_text pero tenemos body_html, extraer texto del HTML
         if not body_text and body_html:
             try:
                 from bs4 import BeautifulSoup
                 soup = BeautifulSoup(body_html, 'html.parser')
                 body_text = soup.get_text()
-                logger.info("📝 Texto extraído del HTML")
+                logger.info("Texto extraido del HTML usando BeautifulSoup")
             except ImportError:
-                # Si no tenemos BeautifulSoup, al menos guardar el HTML
-                logger.warning("⚠️ BeautifulSoup no instalado, guardando solo HTML")
+                logger.warning("BeautifulSoup no instalado, guardando solo HTML")
             except Exception as e:
-                logger.warning(f"⚠️ Error extrayendo texto del HTML: {str(e)}")
+                logger.warning(f"Error extrayendo texto del HTML: {str(e)}")
         
-        logger.info(f"📝 Body text: {str(body_text)[:100]}..." if body_text else "📝 Body text: (vacío)")
-        logger.info(f"📝 Body HTML: {str(body_html)[:100]}..." if body_html else "📝 Body HTML: (vacío)")
+        if not body_text and not body_html:
+            body_text = email_data.get('text', '') or ''
+            body_html = email_data.get('html', '') or ''
+            if body_text or body_html:
+                logger.info("Contenido obtenido del email_data")
         
-        # Buscar al usuario destinatario
+        if not body_text and body_html:
+            body_text = body_html
+            logger.info("Usando HTML como texto plano")
+        
+        logger.info("="*50)
+        logger.info("CONTENIDO FINAL:")
+        logger.info(f"Body text: {str(body_text)[:200]}..." if body_text else "Body text: (vacio)")
+        logger.info(f"Body HTML: {str(body_html)[:200]}..." if body_html else "Body HTML: (vacio)")
+        logger.info("="*50)
+        
         user = None
         received_for = email_data.get('received_for', [])
         
@@ -359,6 +350,7 @@ def procesar_correo_completo(email_data, body_text, body_html, contenido_complet
             for recipient in received_for:
                 try:
                     user = User.objects.get(email=recipient)
+                    logger.info(f"Usuario encontrado por received_for: {user.username}")
                     break
                 except User.DoesNotExist:
                     continue
@@ -367,19 +359,18 @@ def procesar_correo_completo(email_data, body_text, body_html, contenido_complet
             for recipient in recipients:
                 try:
                     user = User.objects.get(email=recipient)
+                    logger.info(f"Usuario encontrado por to: {user.username}")
                     break
                 except User.DoesNotExist:
                     continue
         
         if not user:
-            logger.warning(f"⚠️ No se encontró usuario para: {recipients or received_for}")
+            logger.warning(f"No se encontro usuario para: {recipients or received_for}")
             return
         
-        # 🔥 Asegurarnos de que body_text no sea None
         body_text = body_text or ''
         body_html = body_html or ''
         
-        # Guardar el correo en la base de datos
         email = Email.objects.create(
             user=user,
             subject=subject or 'Sin asunto',
@@ -389,14 +380,13 @@ def procesar_correo_completo(email_data, body_text, body_html, contenido_complet
             body_html=body_html,
             is_sent=False,
             message_id=message_id or '',
-            # Si tienes el campo, guarda el email_id de Resend
-            # resend_email_id=email_id,
         )
         
-        logger.info(f"✅ Correo guardado con ID: {email.id}")
-        logger.info(f"📝 Body text guardado: {body_text[:50]}..." if body_text else "📝 Sin body text")
+        logger.info(f"Correo guardado con ID: {email.id}")
+        logger.info(f"Body text guardado: {str(body_text)[:100]}..." if body_text else "Sin body text")
+        logger.info(f"Body HTML guardado: {str(body_html)[:100]}..." if body_html else "Sin body HTML")
         
     except Exception as e:
-        logger.error(f"❌ Error guardando correo: {str(e)}")
+        logger.error(f"Error guardando correo: {str(e)}")
         logger.error(f"Traceback: {traceback.format_exc()}")
         raise

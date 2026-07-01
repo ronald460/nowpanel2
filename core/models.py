@@ -16,8 +16,8 @@ class Email(models.Model):
     bcc = models.JSONField(default=list, blank=True)
     
     # Contenido
-    body_text = models.TextField(blank=True)
-    body_html = models.TextField(blank=True)
+    body_text = models.TextField(blank=True, null=True, default='')
+    body_html = models.TextField(blank=True, null=True, default='')
     
     # Metadatos
     sent_at = models.DateTimeField(default=timezone.now)
