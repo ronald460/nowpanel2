@@ -1,3 +1,5 @@
+import traceback
+
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -203,10 +205,24 @@ def obtener_contenido_completo(email_id):
         
         if response.status_code == 200:
             data = response.json()
-            logger.info(f"✅ Contenido obtenido para email: {email_id}")
+            
+            # 🔥 LOG EXTRA: Mostrar todas las claves disponibles
+            logger.info("="*50)
+            logger.info("📦 CONTENIDO COMPLETO DE RESEND:")
+            logger.info(f"Claves disponibles: {list(data.keys())}")
+            
+            # Mostrar el contenido completo de forma legible
+            for key, value in data.items():
+                if key in ['text', 'html', 'body']:
+                    logger.info(f"📝 {key}: {str(value)[:200]}..." if value else f"📝 {key}: (vacío)")
+                else:
+                    logger.info(f"📌 {key}: {value}")
+            logger.info("="*50)
+            
             return data
         else:
-            logger.error(f"❌ Error obteniendo contenido: {response.status_code} - {response.text}")
+            logger.error(f"❌ Error obteniendo contenido: {response.status_code}")
+            logger.error(f"Respuesta: {response.text}")
             return None
             
     except Exception as e:
@@ -290,7 +306,50 @@ def procesar_correo_completo(email_data, body_text, body_html, contenido_complet
         
         logger.info(f"📧 Correo recibido de: {sender_email}")
         logger.info(f"Asunto: {subject}")
-        logger.info(f"Email ID: {email_id}")
+        
+        # 🔥 Si no tenemos body_text/body_html, intentar obtenerlos del contenido_completo
+        if not body_text and not body_html and contenido_completo:
+            # Intentar diferentes formas de obtener el cuerpo
+            body_text = (
+                contenido_completo.get('text') or 
+                contenido_completo.get('body') or 
+                contenido_completo.get('plain_body') or
+                contenido_completo.get('plain_text', '')
+            )
+            
+            body_html = (
+                contenido_completo.get('html') or 
+                contenido_completo.get('html_body') or 
+                contenido_completo.get('body_html', '')
+            )
+            
+            # Si el contenido está en un campo 'body' como objeto
+            if isinstance(contenido_completo.get('body'), dict):
+                body_data = contenido_completo.get('body', {})
+                body_text = body_data.get('text', '') or body_text
+                body_html = body_data.get('html', '') or body_html
+            
+            # Si el contenido está en un campo 'content'
+            if isinstance(contenido_completo.get('content'), dict):
+                content_data = contenido_completo.get('content', {})
+                body_text = content_data.get('text', '') or body_text
+                body_html = content_data.get('html', '') or body_html
+        
+        # 🔥 Si aún no tenemos body_text pero tenemos body_html, extraer texto del HTML
+        if not body_text and body_html:
+            try:
+                from bs4 import BeautifulSoup
+                soup = BeautifulSoup(body_html, 'html.parser')
+                body_text = soup.get_text()
+                logger.info("📝 Texto extraído del HTML")
+            except ImportError:
+                # Si no tenemos BeautifulSoup, al menos guardar el HTML
+                logger.warning("⚠️ BeautifulSoup no instalado, guardando solo HTML")
+            except Exception as e:
+                logger.warning(f"⚠️ Error extrayendo texto del HTML: {str(e)}")
+        
+        logger.info(f"📝 Body text: {str(body_text)[:100]}..." if body_text else "📝 Body text: (vacío)")
+        logger.info(f"📝 Body HTML: {str(body_html)[:100]}..." if body_html else "📝 Body HTML: (vacío)")
         
         # Buscar al usuario destinatario
         user = None
@@ -304,37 +363,40 @@ def procesar_correo_completo(email_data, body_text, body_html, contenido_complet
                 except User.DoesNotExist:
                     continue
         
-        if not user:
-            # Intentar con los destinatarios normales
-            if recipients:
-                for recipient in recipients:
-                    try:
-                        user = User.objects.get(email=recipient)
-                        break
-                    except User.DoesNotExist:
-                        continue
+        if not user and recipients:
+            for recipient in recipients:
+                try:
+                    user = User.objects.get(email=recipient)
+                    break
+                except User.DoesNotExist:
+                    continue
         
         if not user:
-            logger.warning(f"⚠️ No se encontró usuario para: {recipients}")
+            logger.warning(f"⚠️ No se encontró usuario para: {recipients or received_for}")
             return
+        
+        # 🔥 Asegurarnos de que body_text no sea None
+        body_text = body_text or ''
+        body_html = body_html or ''
         
         # Guardar el correo en la base de datos
         email = Email.objects.create(
             user=user,
-            subject=subject or '',
+            subject=subject or 'Sin asunto',
             sender=sender_email,
             recipients=recipients if isinstance(recipients, list) else [recipients],
-            body_text=body_text or '',
-            body_html=body_html or '',
+            body_text=body_text,
+            body_html=body_html,
             is_sent=False,
-            message_id=message_id,
-            # Guardar el email_id de Resend para referencia futura
-            # Si tu modelo tiene un campo para esto, guárdalo
+            message_id=message_id or '',
+            # Si tienes el campo, guarda el email_id de Resend
+            # resend_email_id=email_id,
         )
         
         logger.info(f"✅ Correo guardado con ID: {email.id}")
-        logger.info(f"📝 Body text: {body_text[:100]}..." if body_text else "📝 Sin body text")
+        logger.info(f"📝 Body text guardado: {body_text[:50]}..." if body_text else "📝 Sin body text")
         
     except Exception as e:
         logger.error(f"❌ Error guardando correo: {str(e)}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
         raise

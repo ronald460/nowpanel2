@@ -12,3 +12,4 @@ djangorestframework
 django-cors-headers
 django-anymail[resend]
 requests
+beautifulsoup4
